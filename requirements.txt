@@ -1,0 +1,4 @@
+mock
+pyserial==3.4
+paho-mqtt
+argparse
