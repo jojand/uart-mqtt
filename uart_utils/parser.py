@@ -9,11 +9,11 @@ def parse_uart_line(input_string):
 
     match = re.match(MQTT_LINE_REGEX, input_string)
 
-    topic_match = match[TOPIC_MATCH_INDEX] if match and match[TOPIC_MATCH_INDEX] else ''
-    payload_match = match[PAYLOAD_MATCH_INDEX] if match and match[PAYLOAD_MATCH_INDEX] else ''
+    topic_match = match.group(TOPIC_MATCH_INDEX) if match and match.group(TOPIC_MATCH_INDEX) else ''
+    payload_match = match.group(PAYLOAD_MATCH_INDEX) if match and match.group(PAYLOAD_MATCH_INDEX) else ''
 
     if match:
-        result = (match[TOPIC_MATCH_INDEX] is not None) and (match[PAYLOAD_MATCH_INDEX] is not None)
+        result = (match.group(TOPIC_MATCH_INDEX) is not None) and (match.group(PAYLOAD_MATCH_INDEX) is not None)
     else:
         result = False
 
