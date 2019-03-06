@@ -6,6 +6,8 @@ from uart_utils.parser import parse_uart_line
 SERIAL_TIMEOUT = 5
 KEEPALIVE = 60
 mqtt_cli = None
+serial_connection = None
+RF_CONFIG_TOPIC = 'rf/config/#'
 
 
 def process_args():
@@ -35,6 +37,10 @@ def process_serial(line):
     pass
 
 
+def on_message(client, userdata, message):
+    serial_connection.write('[MQTT] {} {}*\n'.format(message.topic, message.payload).encode('utf-8'))
+
+
 def main():
     args = process_args()
     print('UART MQTT gateway start ...')
@@ -42,17 +48,25 @@ def main():
 
     global mqtt_cli
     mqtt_cli = mqtt.Client()
+
     mqtt_cli.connect(host=args.mqtt_host,
                      port=int(args.mqtt_port),
                      keepalive=KEEPALIVE)
 
+    mqtt_cli.on_message = on_message
+    mqtt_cli.subscribe(RF_CONFIG_TOPIC)
+
     print('connected')
 
-    with connect_to_serial(args.port, args.baud) as ser:
-        while True:
-            line = ser.readline()
-            if line:
-                process_serial(line)
+    mqtt_cli.loop_start()
+
+    global serial_connection
+    serial_connection = connect_to_serial(args.port, args.baud)
+
+    while True:
+        line = serial_connection.readline()
+        if line:
+            process_serial(line)
 
 
 if __name__ == '__main__':
